@@ -6,6 +6,7 @@
 package it.polito.tdp.PremierLeague;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.PremierLeague.model.Match;
@@ -48,10 +49,22 @@ public class FXMLController {
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	
+    	txtResult.clear();
+    	
+    	Match m = cmbMatch.getValue() ;
+    	
+    	String msg = model.creaGrafo(m);
+    	txtResult.appendText(msg);
+    	
     }
 
     @FXML
-    void doGiocatoreMigliore(ActionEvent event) {    	
+    void doGiocatoreMigliore(ActionEvent event) {  
+    	
+    	txtResult.clear() ;
+    	
+    	String gBest = model.getGiocatoreMigliore() ;
+    	txtResult.appendText(gBest);
     	
     }
     
@@ -73,5 +86,8 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	cmbMatch.getItems().addAll(model.getMatches()) ;
+    	
     }
 }

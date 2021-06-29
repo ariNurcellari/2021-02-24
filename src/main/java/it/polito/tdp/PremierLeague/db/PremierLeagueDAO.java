@@ -6,7 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import it.polito.tdp.PremierLeague.model.Action;
+import it.polito.tdp.PremierLeague.model.Adiacenza;
 import it.polito.tdp.PremierLeague.model.Match;
 import it.polito.tdp.PremierLeague.model.Player;
 import it.polito.tdp.PremierLeague.model.Team;
@@ -111,4 +114,71 @@ public class PremierLeagueDAO {
 		}
 	}
 	
+	public List<Player> listPlayersOfMatch(Match m, Map<Integer, Player> idMap){
+		String sql = "SELECT actions.PlayerID AS pId, ((totalSuccessfulPassesAll+Assists) / actions.TimePlayed) AS efficienza "
+				+ "FROM  actions, matches "
+				+ "WHERE matches.MatchID = ? "
+				+ "AND matches.MatchID = actions.MatchID";
+		List<Player> result = new ArrayList<Player>();
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, m.getMatchID());
+			
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+
+				Player player = idMap.get(res.getInt("pId"));
+				
+				// Setto l'efficienza in player
+				player.setEfficienza(res.getDouble("efficienza")) ;
+				result.add(player);
+			}
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	
+	public List<Adiacenza> getAdiacenze (Match m, Map<Integer, Player> idMap) {
+		String sql = "SELECT a1.PlayerID AS p1Id, a2.PlayerID AS p2Id, (((a1.TotalSuccessfulPassesAll + a1.Assists)/ a1.TimePlayed) -((a2.TotalSuccessfulPassesAll+ a2.Assists)/ a2.TimePlayed)) AS peso\n"
+				+ "FROM  actions a1, actions a2 "
+				+ "WHERE a1.MatchID = ? "
+				+ "and  a1.MatchID = a2.MatchID "
+				+ "AND a1.PlayerID > a2.PlayerID "
+				+ "AND a1.TeamID <> a2.TeamID "
+				+ "HAVING peso >= 0";
+		List<Adiacenza> result = new ArrayList<>();
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, m.getMatchID());
+			
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+
+				Player p1 = idMap.get(res.getInt("p1Id"));
+				Player p2 = idMap.get(res.getInt("p2Id")) ;
+ 				// Setto l'efficienza in player
+				
+				Adiacenza adiacenza = new Adiacenza(p1, p2, res.getDouble("peso")) ;
+				result.add(adiacenza);
+			}
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+
 }
+	
