@@ -54,9 +54,25 @@ public class Model {
 					Graphs.addEdge(this.grafo, p, p1, p1.getEfficienza() - p.getEfficienza()) ;
 		}*/
 		
-		for(Adiacenza a: dao.getAdiacenze(m, this.idMapPlayers)) {
+		/*for(Adiacenza a: dao.getAdiacenze(m, this.idMapPlayers)) {
 			if(this.grafo.getEdge(a.getP1(), a.getP2()) == null) {
 				Graphs.addEdge(this.grafo, a.getP1(), a.getP2(), a.getPeso()) ;
+			}
+		}*/
+		
+		for(Adiacenza a : dao.getAdiacenze(m, this.idMapPlayers)) {
+			if(a.getPeso() >= 0) {
+				//p1 meglio di p2
+				if(grafo.containsVertex(a.getP1()) && grafo.containsVertex(a.getP2())) {
+					Graphs.addEdgeWithVertices(this.grafo, a.getP1(), 
+							a.getP2(), a.getPeso());
+				}
+			} else {
+				//p2 meglio di p1
+				if(grafo.containsVertex(a.getP1()) && grafo.containsVertex(a.getP2())) {
+					Graphs.addEdgeWithVertices(this.grafo, a.getP2(), 
+							a.getP1(), (-1) * a.getPeso());
+				}
 			}
 		}
 		
